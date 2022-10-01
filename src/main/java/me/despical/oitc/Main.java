@@ -32,6 +32,7 @@ import me.despical.commons.util.UpdateChecker;
 import me.despical.oitc.api.StatsStorage;
 import me.despical.oitc.arena.Arena;
 import me.despical.oitc.arena.ArenaRegistry;
+import me.despical.oitc.arena.ArenaState;
 import me.despical.oitc.arena.ArenaUtils;
 import me.despical.oitc.commands.CommandHandler;
 import me.despical.oitc.events.*;
@@ -45,17 +46,27 @@ import me.despical.oitc.user.User;
 import me.despical.oitc.user.UserManager;
 import me.despical.oitc.user.data.MysqlManager;
 import org.bstats.charts.SimplePie;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.PluginMessageListener;
 
+import com.google.common.collect.Iterables;
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Despical
  * <p>
  * Created at 02.07.2020
  */
-public class Main extends JavaPlugin {
+public class Main extends JavaPlugin implements PluginMessageListener {
 
 	private boolean forceDisable;
 
@@ -69,7 +80,9 @@ public class Main extends JavaPlugin {
 	private ChatManager chatManager;
 	private UserManager userManager;
 	private PermissionsManager permissionsManager;
-	
+
+	private String serverName;
+
 	@Override
 	public void onEnable() {
 		if ((forceDisable = !validateIfPluginShouldStart())) {
@@ -100,8 +113,68 @@ public class Main extends JavaPlugin {
 		if (configPreferences.getOption(ConfigPreferences.Option.NAME_TAGS_HIDDEN)) {
 			getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> getServer().getOnlinePlayers().forEach(ArenaUtils::updateNameTagsVisibility), 60, 140);
 		}
+
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
+			if (ArenaRegistry.getArenas().isEmpty()) {
+				return;
+			}
+
+			Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
+			if (player == null) { return; }
+
+			{
+				System.out.println("getting server name");
+				ByteArrayDataOutput out = ByteStreams.newDataOutput();
+				out.writeUTF("GetServer");
+				player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+			}
+
+			if (serverName == null) { return; }
+
+			System.out.println("server name is " + serverName);
+
+			Arena bungeeArena = ArenaRegistry.getBungeeArena();
+			if (bungeeArena == null || bungeeArena.getArenaState().equals(ArenaState.WAITING_FOR_PLAYERS) || bungeeArena.getArenaState().equals(ArenaState.STARTING)) {
+				System.out.println("we're open!");
+				return;
+			}
+
+			System.out.println("we're not open!");
+
+			{
+				ByteArrayDataOutput out = ByteStreams.newDataOutput();
+				out.writeUTF("Forward");
+				out.writeUTF("ALL");
+				out.writeUTF("OITCBusy");
+
+				ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+				DataOutputStream msgout = new DataOutputStream(msgbytes);
+				try {
+					msgout.writeUTF(serverName);
+				} catch (IOException exception) {
+					exception.printStackTrace();
+				}
+
+				out.writeShort(msgbytes.toByteArray().length);
+				out.write(msgbytes.toByteArray());
+
+				player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+			}
+		}, 60, 60);
 	}
-	
+
+	@Override
+	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+		if (!channel.equals("BungeeCord")) {
+			return;
+		}
+		ByteArrayDataInput in = ByteStreams.newDataInput(message);
+		String subchannel = in.readUTF();
+		if (subchannel.equals("GetServer")) {
+			serverName = in.readUTF();
+		}
+	}
+
 	private boolean validateIfPluginShouldStart() {
 		if (!VersionResolver.isCurrentBetween(VersionResolver.ServerVersion.v1_9_R1, VersionResolver.ServerVersion.v1_19_R1)) {
 			LogUtils.sendConsoleMessage("[OITC] &cYour server version is not supported by One in the Chamber!");
@@ -124,7 +197,7 @@ public class Main extends JavaPlugin {
 
 		return true;
 	}
-	
+
 	@Override
 	public void onDisable() {
 		if (forceDisable) return;
@@ -134,7 +207,7 @@ public class Main extends JavaPlugin {
 
 		getServer().getLogger().removeHandler(exceptionLogHandler);
 		saveAllUserStatistics();
-		
+
 		if (database != null) {
 			database.shutdownConnPool();
 		}
@@ -166,7 +239,7 @@ public class Main extends JavaPlugin {
 
 		LogUtils.log("System disable finished took {0} ms.", System.currentTimeMillis() - start);
 	}
-	
+
 	private void initializeClasses() {
 		ScoreboardLib.setPluginInstance(this);
 		chatManager = new ChatManager(this);
@@ -196,7 +269,7 @@ public class Main extends JavaPlugin {
 
 		registerSoftDependenciesAndServices();
 	}
-	
+
 	private void registerSoftDependenciesAndServices() {
 		LogUtils.log("Hooking into soft dependencies");
 		long start = System.currentTimeMillis();
@@ -210,7 +283,7 @@ public class Main extends JavaPlugin {
 
 		LogUtils.log("Hooked into soft dependencies took {0} ms", System.currentTimeMillis() - start);
 	}
-	
+
 	private void startPluginMetrics() {
 		Metrics metrics = new Metrics(this, 8118);
 
@@ -218,7 +291,7 @@ public class Main extends JavaPlugin {
 		metrics.addCustomChart(new SimplePie("bungeecord_hooked", () -> String.valueOf(configPreferences.getOption(ConfigPreferences.Option.BUNGEE_ENABLED))));
 		metrics.addCustomChart(new SimplePie("update_notifier", () -> String.valueOf(configPreferences.getOption(ConfigPreferences.Option.UPDATE_NOTIFIER_ENABLED))));
 	}
-	
+
 	private void checkUpdate() {
 		if (!configPreferences.getOption(ConfigPreferences.Option.UPDATE_NOTIFIER_ENABLED)) return;
 
@@ -234,23 +307,23 @@ public class Main extends JavaPlugin {
 	private void setupFiles() {
 		Collections.streamOf("arenas", "bungee", "rewards", "stats", "items", "mysql", "messages").filter(name -> !new File(getDataFolder(),name + ".yml").exists()).forEach(name -> saveResource(name + ".yml", false));
 	}
-	
+
 	public RewardsFactory getRewardsFactory() {
 		return rewardsFactory;
 	}
-	
+
 	public BungeeManager getBungeeManager() {
 		return bungeeManager;
 	}
-	
+
 	public ConfigPreferences getConfigPreferences() {
 		return configPreferences;
 	}
-	
+
 	public MysqlDatabase getMysqlDatabase() {
 		return database;
 	}
-	
+
 	public SignManager getSignManager() {
 		return signManager;
 	}
@@ -258,7 +331,7 @@ public class Main extends JavaPlugin {
 	public ChatManager getChatManager() {
 		return chatManager;
 	}
-	
+
 	public CommandHandler getCommandHandler() {
 		return commandHandler;
 	}

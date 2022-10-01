@@ -27,6 +27,9 @@ import me.despical.oitc.arena.Arena;
 import me.despical.oitc.arena.ArenaManager;
 import me.despical.oitc.arena.ArenaRegistry;
 import me.despical.oitc.arena.ArenaState;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,6 +37,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerKickEvent.Cause;
 import org.bukkit.event.server.ServerListPingEvent;
 
 import java.util.EnumMap;
@@ -64,6 +68,7 @@ public class BungeeManager implements Listener {
 		}
 
 		plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, "BungeeCord");
+		plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, "BungeeCord", plugin);
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -72,11 +77,7 @@ public class BungeeManager implements Listener {
 			return;
 		}
 
-		ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		out.writeUTF("Connect");
-		out.writeUTF(getHubServerName());
-
-		player.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
+		player.kick(Component.text("Game over!"), Cause.RESTART_COMMAND);
 
 		LogUtils.log("{0} was teleported to the hub server", player.getName());
 	}
@@ -97,8 +98,9 @@ public class BungeeManager implements Listener {
 
 		Arena bungeeArena = ArenaRegistry.getBungeeArena(); // Do not cache in constructor
 
-		event.setMaxPlayers(bungeeArena.getMaximumPlayers());
-		event.setMotd(motd.replace("%state%", gameStates.get(bungeeArena.getArenaState())));
+		if (!bungeeArena.getArenaState().equals(ArenaState.WAITING_FOR_PLAYERS)) {
+
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)
