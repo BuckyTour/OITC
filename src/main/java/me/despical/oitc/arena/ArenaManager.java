@@ -151,9 +151,8 @@ public class ArenaManager {
 
 			player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
-			player.setFlying(true);
 			player.setAllowFlight(true);
-			player.setGameMode(GameMode.SPECTATOR);
+			player.setFlying(true);
 
 			user.setSpectator(true);
 
