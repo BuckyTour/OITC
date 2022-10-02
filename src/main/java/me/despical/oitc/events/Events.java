@@ -197,7 +197,49 @@ public class Events extends ListenerAdapter {
 			return;
 		}
 
-		event.setCancelled(Collections.contains(event.getClickedBlock().getType(), XMaterial.PAINTING.parseMaterial(), XMaterial.FLOWER_POT.parseMaterial()));
+		event.setCancelled(Collections.contains(
+			event.getClickedBlock().getType(),
+			XMaterial.PAINTING.parseMaterial(),
+			XMaterial.FLOWER_POT.parseMaterial(),
+
+			XMaterial.OAK_DOOR.parseMaterial(),
+			XMaterial.BIRCH_DOOR.parseMaterial(),
+			XMaterial.SPRUCE_DOOR.parseMaterial(),
+			XMaterial.JUNGLE_DOOR.parseMaterial(),
+			XMaterial.DARK_OAK_DOOR.parseMaterial(),
+			XMaterial.ACACIA_DOOR.parseMaterial(),
+			XMaterial.CRIMSON_DOOR.parseMaterial(),
+			XMaterial.WARPED_DOOR.parseMaterial(),
+
+			XMaterial.OAK_TRAPDOOR.parseMaterial(),
+			XMaterial.BIRCH_TRAPDOOR.parseMaterial(),
+			XMaterial.SPRUCE_TRAPDOOR.parseMaterial(),
+			XMaterial.JUNGLE_TRAPDOOR.parseMaterial(),
+			XMaterial.DARK_OAK_TRAPDOOR.parseMaterial(),
+			XMaterial.ACACIA_TRAPDOOR.parseMaterial(),
+			XMaterial.CRIMSON_TRAPDOOR.parseMaterial(),
+			XMaterial.WARPED_TRAPDOOR.parseMaterial(),
+
+			XMaterial.OAK_FENCE_GATE.parseMaterial(),
+			XMaterial.BIRCH_FENCE_GATE.parseMaterial(),
+			XMaterial.SPRUCE_FENCE_GATE.parseMaterial(),
+			XMaterial.JUNGLE_FENCE_GATE.parseMaterial(),
+			XMaterial.DARK_OAK_FENCE_GATE.parseMaterial(),
+			XMaterial.ACACIA_FENCE_GATE.parseMaterial(),
+			XMaterial.CRIMSON_FENCE_GATE.parseMaterial(),
+			XMaterial.WARPED_FENCE_GATE.parseMaterial(),
+
+			XMaterial.STONE_BUTTON.parseMaterial(),
+			XMaterial.OAK_BUTTON.parseMaterial(),
+			XMaterial.BIRCH_BUTTON.parseMaterial(),
+			XMaterial.SPRUCE_BUTTON.parseMaterial(),
+			XMaterial.JUNGLE_BUTTON.parseMaterial(),
+			XMaterial.OAK_BUTTON.parseMaterial(),
+			XMaterial.DARK_OAK_BUTTON.parseMaterial(),
+			XMaterial.ACACIA_BUTTON.parseMaterial(),
+			XMaterial.CRIMSON_BUTTON.parseMaterial(),
+			XMaterial.WARPED_BUTTON.parseMaterial()
+		));
 	}
 
 	@EventHandler
