@@ -229,6 +229,8 @@ public class Events extends ListenerAdapter {
 			XMaterial.CRIMSON_FENCE_GATE.parseMaterial(),
 			XMaterial.WARPED_FENCE_GATE.parseMaterial(),
 
+			XMaterial.LEVER.parseMaterial(),
+
 			XMaterial.STONE_BUTTON.parseMaterial(),
 			XMaterial.OAK_BUTTON.parseMaterial(),
 			XMaterial.BIRCH_BUTTON.parseMaterial(),
