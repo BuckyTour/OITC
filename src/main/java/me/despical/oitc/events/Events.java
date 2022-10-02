@@ -419,7 +419,7 @@ public class Events extends ListenerAdapter {
 		killerUser.addStat(StatsStorage.StatisticType.LOCAL_KILLS, 1);
 		killerUser.addStat(StatsStorage.StatisticType.KILLS, 1);
 
-		if (killerUser.getStat(StatsStorage.StatisticType.LOCAL_KILL_STREAK) == 1){
+		if (killerUser.getStat(StatsStorage.StatisticType.LOCAL_KILL_STREAK) <= 4){
 			arena.broadcastMessage(chatManager.prefixedFormattedMessage(arena, chatManager.message("in_game.messages.death").replace("%killer%", victim.getKiller().getName()), victim));
 		} else {
 			arena.broadcastMessage(chatManager.prefixedFormattedMessage(arena, chatManager.message("in_game.messages.kill_streak").replace("%kill_streak%", Integer.toString(killerUser.getStat(StatsStorage.StatisticType.LOCAL_KILL_STREAK))).replace("%killer%", victim.getKiller().getName()), victim));
