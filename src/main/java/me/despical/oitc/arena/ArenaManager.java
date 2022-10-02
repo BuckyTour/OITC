@@ -147,12 +147,13 @@ public class ArenaManager {
 			arena.teleportToStartLocation(player);
 			player.sendMessage(chatManager.prefixedMessage("In-Game.You-Are-Spectator"));
 
-			SpecialItemManager.giveItem(player, "Teleporter", "Spectator-Settings", "Leave", "Play-Again");
+			SpecialItemManager.giveItem(player, "Teleporter", "Spectator-Settings", "Leave");
 
 			player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
 			player.setFlying(true);
 			player.setAllowFlight(true);
+			player.setGameMode(GameMode.SPECTATOR);
 
 			user.setSpectator(true);
 
