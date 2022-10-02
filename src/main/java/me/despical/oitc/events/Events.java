@@ -70,7 +70,7 @@ public class Events extends ListenerAdapter {
 
 	public Events(Main plugin) {
 		super (plugin);
-		
+
 		registerLegacyEvents();
 	}
 
@@ -193,7 +193,7 @@ public class Events extends ListenerAdapter {
 
 	@EventHandler
 	public void onInGameInteract(PlayerInteractEvent event) {
-		if (!ArenaRegistry.isInArena(event.getPlayer()) || event.getClickedBlock() == null) {
+		if (event.getClickedBlock() == null) {
 			return;
 		}
 
@@ -288,7 +288,7 @@ public class Events extends ListenerAdapter {
 
 	@EventHandler
 	public void onFoodLevelChange(FoodLevelChangeEvent event) {
-		if (event.getEntity().getType() == EntityType.PLAYER && ArenaRegistry.isInArena((Player) event.getEntity())) {
+		if (event.getEntity().getType() == EntityType.PLAYER) {
 			event.setFoodLevel(20);
 			event.setCancelled(true);
 		}
@@ -311,7 +311,7 @@ public class Events extends ListenerAdapter {
 	@EventHandler
 	public void onHangingBreakEvent(HangingBreakByEntityEvent event) {
 		if (event.getEntity() instanceof ItemFrame || event.getEntity() instanceof Painting) {
-			if (event.getRemover() instanceof Player && ArenaRegistry.isInArena((Player) event.getRemover())) {
+			if (event.getRemover() instanceof Player) {
 				event.setCancelled(true);
 				return;
 			}
@@ -322,12 +322,12 @@ public class Events extends ListenerAdapter {
 
 			Arrow arrow = (Arrow) event.getRemover();
 
-			if (arrow.getShooter() instanceof Player && ArenaRegistry.isInArena((Player) arrow.getShooter())) {
+			if (arrow.getShooter() instanceof Player) {
 				event.setCancelled(true);
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onDamageEntity(EntityDamageByEntityEvent e) {
 		if (!(e.getEntity() instanceof Player && e.getDamager() instanceof Arrow)) {
@@ -349,7 +349,7 @@ public class Events extends ListenerAdapter {
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onDeath(PlayerDeathEvent e) {
 		Player victim = e.getEntity();
@@ -392,7 +392,7 @@ public class Events extends ListenerAdapter {
 			ArenaManager.stopGame(false, arena);
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onRespawn(PlayerRespawnEvent event) {
 		Player player = event.getPlayer();
@@ -486,7 +486,7 @@ public class Events extends ListenerAdapter {
 			event.setCancelled(true);
 		}
 	}
-	
+
 	private void registerLegacyEvents() {
 		registerIf((bool) -> VersionResolver.isCurrentHigher(VersionResolver.ServerVersion.v1_9_R2), () -> new Listener() {
 
