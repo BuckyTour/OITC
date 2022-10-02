@@ -489,12 +489,6 @@ public class Events extends ListenerAdapter {
 			return;
 		}
 
-		Player victim = (Player) event.getEntity();
-
-		if (!ArenaRegistry.isInArena(victim)) {
-			return;
-		}
-
 		if (event.getCause().equals(EntityDamageEvent.DamageCause.FALL)) {
 			if (preferences.getOption(ConfigPreferences.Option.DISABLE_FALL_DAMAGE)) {
 				return;
