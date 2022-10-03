@@ -55,6 +55,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -535,5 +536,16 @@ public class Events extends ListenerAdapter {
 				}
 			}
 		});
+	}
+
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerLogin(final PlayerLoginEvent event) {
+		if (event.getResult() == Result.KICK_FULL && event.getPlayer().hasPermission("buckylobby.joinfullservers")) {
+			event.allow();
+		}
+
+		if (event.getResult() == Result.KICK_WHITELIST && event.getPlayer().hasPermission("buckylobby.joinfullservers")) {
+			event.allow();
+		}
 	}
 }
