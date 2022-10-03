@@ -82,7 +82,9 @@ public class TopPlayersCommand extends SubCommand {
 		for (int i = 0; i < 10; i++) {
 			try {
 				UUID current = (UUID) stats.keySet().toArray()[stats.keySet().toArray().length - 1];
-				sender.sendMessage(formatMessage(statistic, plugin.getServer().getOfflinePlayer(current).getName(), i + 1, stats.get(current)));
+				String name = plugin.getServer().getOfflinePlayer(current).getName();
+				if (name == null) { throw new NullPointerException(); }
+				sender.sendMessage(formatMessage(statistic, name, i + 1, stats.get(current)));
 				stats.remove(current);
 			} catch (IndexOutOfBoundsException ex) {
 				sender.sendMessage(formatMessage(statistic, "Empty", i + 1, 0));
@@ -96,12 +98,14 @@ public class TopPlayersCommand extends SubCommand {
 
 						if (set.next()) {
 							sender.sendMessage(formatMessage(statistic, set.getString(1), i + 1, stats.get(current)));
+							stats.remove(current);
 							continue;
 						}
 					} catch (SQLException ignored) {}
 				}
 
 				sender.sendMessage(formatMessage(statistic, "Unknown Player", i + 1, stats.get(current)));
+				stats.remove(current);
 			}
 		}
 	}
